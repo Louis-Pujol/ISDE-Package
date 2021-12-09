@@ -1,0 +1,18 @@
+Metadata-Version: 2.1
+Name: ISDE
+Version: 0.0.1
+Summary: Independence Structure Density Estimation
+Home-page: https://github.com/pypa/sampleproject
+Author: Louis Pujol
+Author-email: louis.pujol@universite-paris-saclay.fr
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+UNKNOWN
+

@@ -1,0 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/ISDE.egg-info/PKG-INFO
+src/ISDE.egg-info/SOURCES.txt
+src/ISDE.egg-info/dependency_links.txt
+src/ISDE.egg-info/top_level.txt
+src/isde/ISDE.py
+src/isde/__init__.py
+src/isde/estimators/EmpiricalCovariance.py
+src/isde/estimators/GaussianKDE.py
+src/isde/estimators/__init__.py
