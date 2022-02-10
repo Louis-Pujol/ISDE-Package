@@ -15,13 +15,14 @@ from ast import literal_eval
     
 
 
-def ISDE(X, m, n, multidimensional_estimator, **params_estimator):
+def ISDE(X, m, n, k, multidimensional_estimator, **params_estimator):
     '''
     
     Inputs
     - X : input dataset (numpy array)
     - m : size of set use to 
     - n : size of set used ton compute log-likelihoods
+    - k : desired size of biggest bloc in the outputed partition
     '''
     
     by_subsets = {}
@@ -29,7 +30,7 @@ def ISDE(X, m, n, multidimensional_estimator, **params_estimator):
     N, d = X.shape
     W, Z = train_test_split(X, train_size=m, test_size=n)
     
-    for i in range(1, d+1):
+    for i in range(1, k+1):
         for S in itertools.combinations(range(d), i):
         
             f, f_params = multidimensional_estimator(W[:, S], params_estimator)
@@ -39,13 +40,13 @@ def ISDE(X, m, n, multidimensional_estimator, **params_estimator):
 
 
             
-    optimal_partition = find_optimal_partition(by_subsets, max_size=d, min_size=1, exclude = [], sense='maximize')[0]
+    optimal_partition = find_optimal_partition(by_subsets, max_size=k, min_size=1, exclude = [], sense='maximize')[0]
     
     optimal_parameters = []
     for S in optimal_partition:
         optimal_parameters.append(by_subsets[tuple(S)]["params"])
         
-    return optimal_partition, optimal_parameters
+    return by_subsets, optimal_partition, optimal_parameters
 
 
 

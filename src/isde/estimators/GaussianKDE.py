@@ -17,9 +17,9 @@ def gaussian_kde(grid_points, eval_points, h):
     """
     
     N, d = grid_points.shape
-    x_i = LazyTensor_np(eval_points[:, None, :])  # (M, 1, d) KeOps LazyTensor, wrapped around the numpy array eval_points
-    X_j = LazyTensor_np(grid_points[None, :, :])  # (1, N, d) KeOps LazyTensor, wrapped around the numpy array grid_points
-    h_l = LazyTensor_np(h)
+    x_i = LazyTensor_np(np.ascontiguousarray(eval_points[:, None, :]))  # (M, 1, d) KeOps LazyTensor, wrapped around the numpy array eval_points
+    X_j = LazyTensor_np(np.ascontiguousarray(grid_points[None, :, :]))  # (1, N, d) KeOps LazyTensor, wrapped around the numpy array grid_points
+    h_l = LazyTensor_np(np.ascontiguousarray(h))
 
     D_ij = ( -0.5 * (((x_i - X_j) / h_l) ** 2).sum(-1))  # **Symbolic** (M, N) matrix of squared distances
     s_i = D_ij.exp().sum(dim=1).ravel()  # genuine (M,) array of integer indices
