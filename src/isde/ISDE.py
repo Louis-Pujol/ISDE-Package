@@ -15,7 +15,7 @@ from ast import literal_eval
     
 
 
-def ISDE(X, m, n, k, multidimensional_estimator, **params_estimator):
+def ISDE(X, m, n, k, multidimensional_estimator, do_optimization=True, verbose=False, **params_estimator):
     '''
     
     Inputs
@@ -31,22 +31,27 @@ def ISDE(X, m, n, k, multidimensional_estimator, **params_estimator):
     W, Z = train_test_split(X, train_size=m, test_size=n)
     
     for i in range(1, k+1):
+        if verbose:
+            print("Computing estimators for subsets of size {}...".format(i))
+            
         for S in itertools.combinations(range(d), i):
         
             f, f_params = multidimensional_estimator(W[:, S], params_estimator)
             ll = np.mean( f.score_samples(grid_points = W[:, S], eval_points = Z[:, S]) )
             
             by_subsets[S] = {'log_likelihood': ll, 'params': f_params}
-
-
             
-    optimal_partition = find_optimal_partition(by_subsets, max_size=k, min_size=1, exclude = [], sense='maximize')[0]
-    
-    optimal_parameters = []
-    for S in optimal_partition:
-        optimal_parameters.append(by_subsets[tuple(S)]["params"])
+    if do_optimization:
+        optimal_partition = find_optimal_partition(by_subsets, max_size=k, min_size=1, exclude = [], sense='maximize')[0]
+        optimal_parameters = []
         
-    return by_subsets, optimal_partition, optimal_parameters
+        for S in optimal_partition:
+            optimal_parameters.append(by_subsets[tuple(S)]["params"])
+		    
+        return by_subsets, optimal_partition, optimal_parameters 
+    else:
+
+        return by_subsets
 
 
 
