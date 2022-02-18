@@ -1,8 +1,33 @@
 import numpy as np
 from pykeops.numpy import LazyTensor as LazyTensor_np
 
+from pykeops.numpy import Genred
 
-def gaussian_kde(grid_points, eval_points, h):
+from time import time
+import os
+
+
+
+
+
+def gaussian_kde(grid_points, eval_points, h, backend='auto'):
+    
+
+    N, d = grid_points.shape
+    
+    my_conv = Genred('Exp(- SqNorm2(x - y))', ['x = Vi({})'.format(d), 'y = Vj({})'.format(d)],
+                     reduction_op='Sum',axis=0)
+
+    
+    C = np.sqrt(0.5) / h
+    a = my_conv(C * np.ascontiguousarray(grid_points)
+                ,C * np.ascontiguousarray(eval_points),
+                backend=backend).transpose()[0]
+    
+    return a / (N*(h ** d)*np.power(2*np.pi, d/2))
+
+
+def gaussian_kde_old(grid_points, eval_points, h):
     """
     Perform Kernel Density estimation with grid_points and eval_points and a vector of bandwidths
     Works with gpu and torch (and cpu ?)
@@ -29,6 +54,8 @@ def gaussian_kde(grid_points, eval_points, h):
     return out
 
 
+
+
 class GaussianKDE:
     
     def __init__(self, bandwidth):
@@ -38,7 +65,7 @@ class GaussianKDE:
         """ Return log-likelihood evaluation
         """
         _, d = eval_points.shape
-        return np.log( gaussian_kde(grid_points=grid_points, eval_points=eval_points, h=self.bandwidth*np.ones(d)) )
+        return np.log( gaussian_kde(grid_points=grid_points, eval_points=eval_points, h=self.bandwidth) )
     
 def CVKDE(W, params):
     
@@ -68,7 +95,7 @@ def CVKDE(W, params):
         W_train, W_test = W[train_indexes, :], W[test_indexes, :]
                             
         for h in hs:
-            scores[h].append(np.mean (np.log( gaussian_kde(grid_points=W_train, eval_points=W_test, h=h*np.ones(d)))))
+            scores[h].append(np.mean (np.log( gaussian_kde(grid_points=W_train, eval_points=W_test, h=h))))
             
     mean_scores = [np.mean(scores[h]) for h in hs]
     h_opt = hs[np.argmax(mean_scores)]

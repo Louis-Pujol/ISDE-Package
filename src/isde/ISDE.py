@@ -3,6 +3,7 @@ import itertools
 
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable, LpMinimize
 from pulp import GLPK
+from  pulp.apis import PULP_CBC_CMD
 
 from sklearn.model_selection import train_test_split
 
@@ -37,7 +38,7 @@ def ISDE(X, m, n, k, multidimensional_estimator, do_optimization=True, verbose=F
         for S in itertools.combinations(range(d), i):
         
             f, f_params = multidimensional_estimator(W[:, S], params_estimator)
-            ll = np.mean( f.score_samples(grid_points = W[:, S], eval_points = Z[:, S]) )
+            ll = np.ma.masked_invalid(f.score_samples(grid_points = W[:, S], eval_points = Z[:, S])).mean()
             
             by_subsets[S] = {'log_likelihood': ll, 'params': f_params}
             
@@ -57,8 +58,6 @@ def ISDE(X, m, n, k, multidimensional_estimator, do_optimization=True, verbose=F
 
 
 def find_optimal_partition(scores_by_subsets, max_size, min_size=1, exclude = [], sense='maximize'):
-    
-    nb_to_exclude = len(exclude)
     
     ### Create Graph
     weights = {}
@@ -102,14 +101,12 @@ def find_optimal_partition(scores_by_subsets, max_size, min_size=1, exclude = []
         
     
     ### exclude
-    if len(exclude) > 1:
-    
-        xs_name = [ list(literal_eval(i.name)) for i in xs]
-        for p_exclude in exclude:
-            model += lpSum( [xs[xs_name.index(s)] for s in p_exclude]) <= len(p_exclude) - 1 
+    xs_name = [ list(literal_eval(i.name)) for i in xs]
+    for p_exclude in exclude:
+        model += lpSum( [xs[xs_name.index(s)] for s in p_exclude]) <= len(p_exclude) - 1 
     
     #Solve
-    model.solve()
+    model.solve(PULP_CBC_CMD(msg=False))
     #if verbose != 0:
         #print("Status: {}, {}".format(model.status, LpStatus[model.status]))
         #print("Objective value : {}".format(model.objective.value()))
