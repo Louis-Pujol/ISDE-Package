@@ -103,6 +103,26 @@ def CVKDE(W, params):
     kde = GaussianKDE(bandwidth=h_opt)
         
     return kde, {'bandwidth' : h_opt}
+
+def Hold_out_KDE(W,params):
+    
+    hs = params['hs']
+    n_train = params['n_train']
+    
+    W_train = W[0:n_train, :] 
+    W_test = W[n_train::, ]
+    
+    scores = {h : [] for h in hs}
+    for h in hs:
+        tmp = np.log(gaussian_kde(grid_points=W_train, eval_points=W_test, h=h))
+        scores[h].append(np.ma.masked_invalid(tmp).mean())
+    
+    
+    h_opt = hs[np.argmax([scores[h] for h in hs])]
+    kde = GaussianKDE(bandwidth=h_opt)
+        
+    return kde, {'bandwidth' : h_opt}
+
     
 def KDE_fixed_h(W, params):
     
